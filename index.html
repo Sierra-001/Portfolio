@@ -1,17 +1,1911 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sierra</title>
-    <link rel="preconnect" href="https://api.fontshare.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./Assets/CSS/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sierra</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="assets/Images/Icons/oni_minimalist.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    img { display: block; max-width: 100%; height: auto; }
+    button { font: inherit; }
+
+    :root {
+      --canvas: #0a0e14;
+      --surface: #0d1219;
+      --surface-2: #141b25;
+      --surface-3: #05080c;
+      --ink: #d6dde2;
+      --ink-bright: #eef2f5;
+      --ink-muted: rgba(214, 221, 226, 0.55);
+      --ink-faint: rgba(214, 221, 226, 0.28);
+      --ink-whisper: rgba(214, 221, 226, 0.12);
+      --accent: #6b96a8;
+      --accent-bright: #8fb4c4;
+      --accent-glow: rgba(107, 150, 168, 0.25);
+      --alert: #8b3030;
+      --warn: #b8860b;
+      --line: rgba(214, 221, 226, 0.1);
+      --line-strong: rgba(214, 221, 226, 0.28);
+
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+      --display: "Rajdhani", "Satoshi", sans-serif;
+      --body: "Satoshi", sans-serif;
+      --serif: "Playfair Display", serif;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+    @media (max-width: 1920px) { html { font-size: 0.833333vw; } }
+    @media (max-width: 1440px) { html { font-size: 1.111111vw; } }
+    @media (max-width: 1024px) { html { font-size: 1.5625vw; } }
+    @media (max-width: 640px)  { html { font-size: 4.444444vw; } }
+
+    body {
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--body);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::after {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 100;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.014) 0px, rgba(255,255,255,0.014) 1px,
+        transparent 1px, transparent 3px
+      );
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(107,150,168,0.06), transparent 60%);
+    }
+    ::selection { background: var(--accent); color: var(--canvas); }
+
+    h1, h2, h3, h4 {
+      font-family: var(--display);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+    }
+    .serif-accent {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    a { color: inherit; }
+    .mono { font-family: var(--mono); }
+
+    .container { max-width: 120rem; margin-inline: auto; padding-inline: 1.5rem; }
+    @media (min-width: 1024px) { .container { padding-inline: 3rem; } }
+
+    section { padding-block: 6rem; position: relative; z-index: 1; }
+    @media (min-width: 1024px) { section { padding-block: 8rem; } }
+
+    .rule { border-top: 1px dashed var(--line); }
+    .rule-solid { border-top: 1px solid var(--line); }
+
+    .tac-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .tac-label::before {
+      content: "";
+      width: 2rem; height: 1px;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+    .tac-label.alert { color: var(--alert); }
+    .tac-label.alert::before { background: var(--alert); opacity: 1; }
+
+    header {
+      position: fixed; inset-inline: 0; top: 0; z-index: 50;
+      background: linear-gradient(to bottom, rgba(10,14,20,0.9), rgba(10,14,20,0.4) 80%, transparent);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-inner {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+    }
+    @media (min-width: 1024px) { .header-inner { padding: 1rem 3rem; } }
+
+    .header-left {
+      display: flex; align-items: center; gap: 0.875rem;
+      justify-self: start;
+    }
+    .emblem {
+      width: 2rem; height: 2rem;
+      color: var(--accent);
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+    @media (min-width: 1024px) { .emblem { width: 2.5rem; height: 2.5rem; } }
+
+    .header-left-text { display: none; }
+    @media (min-width: 1024px) { .header-left-text { display: block; } }
+    .header-left-text p:first-child {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+    }
+    .header-left-text p:last-child {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-top: 0.125rem;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.75rem;
+      justify-self: center;
+      text-decoration: none; color: var(--ink-bright);
+    }
+    .logo-mark {
+      width: 0.75rem; height: 0.75rem;
+      border: 1px solid var(--accent);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .header-right { justify-self: end; display: flex; align-items: center; gap: 1.5rem; }
+
+    .header-nav { display: none; gap: 1.75rem; }
+    @media (min-width: 1024px) { .header-nav { display: flex; } }
+    .header-nav a {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink-muted);
+      transition: color 0.2s;
+      position: relative;
+    }
+    .header-nav a::before {
+      content: "›";
+      position: absolute;
+      left: -0.75rem;
+      opacity: 0;
+      color: var(--accent);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .header-nav a:hover { color: var(--ink-bright); }
+    .header-nav a:hover::before { opacity: 1; }
+
+    .menu-btn {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      padding: 0.5rem 0.875rem;
+      color: var(--ink);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .menu-btn:hover {
+      border-color: var(--accent);
+      color: var(--ink-bright);
+      background: rgba(107, 150, 168, 0.05);
+    }
+    .menu-btn-label { display: none; }
+    @media (min-width: 640px) { .menu-btn-label { display: inline; } }
+    .hamburger { display: flex; flex-direction: column; gap: 0.3rem; }
+    .hamburger span {
+      display: block; width: 1.1rem; height: 1px;
+      background: currentColor;
+      transition: transform 0.3s;
+    }
+
+    #hero {
+      min-height: 100svh;
+      padding: 9rem 1.5rem 4rem;
+      display: flex; align-items: center;
+      position: relative;
+      border-bottom: 1px dashed var(--line);
+    }
+    @media (min-width: 1024px) { #hero { padding: 10rem 3rem 4rem; } }
+    #hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 5rem 5rem;
+      opacity: 0.5;
+      -webkit-mask-image: radial-gradient(ellipse at 30% 40%, black 10%, transparent 70%);
+              mask-image: radial-gradient(ellipse at 30% 40%, black 10%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr; gap: 3rem;
+      align-items: center; width: 100%;
+      position: relative;
+    }
+    @media (min-width: 1024px) {
+      .hero-grid { grid-template-columns: repeat(12, 1fr); gap: 2rem; }
+      .hero-content { grid-column: span 6; }
+      .hero-image { grid-column: 7 / span 6; }
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 0.625rem;
+      padding: 0.375rem 0.75rem;
+      border: 1px solid var(--line-strong);
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 1.75rem;
+    }
+    .tag-dot {
+      width: 0.4rem; height: 0.4rem;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-bright);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .hero-content h1 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 3rem;
+      line-height: 1.02;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      color: var(--ink-bright);
+    }
+    @media (min-width: 640px) { .hero-content h1 { font-size: 4.25rem; } }
+    @media (min-width: 1024px) { .hero-content h1 { font-size: 5.5rem; } }
+    .hero-content h1 .serif-accent {
+      color: var(--accent-bright);
+      font-size: 0.95em;
+    }
+
+    .hero-lead {
+      max-width: 48ch;
+      margin-top: 2rem;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: 0.875rem; margin-top: 2.25rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      padding: 0.9rem 1.6rem;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s;
+      border: 1px solid transparent;
+    }
+    .btn-solid {
+      background: var(--ink-bright);
+      color: var(--canvas);
+    }
+    .btn-solid:hover {
+      background: var(--accent-bright);
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+    .btn-ghost {
+      border-color: var(--line-strong);
+      color: var(--ink);
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent-bright);
+      background: rgba(107, 150, 168, 0.06);
+    }
+    .btn-arrow { transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); display: inline-block; }
+    .btn:hover .btn-arrow { transform: translateX(0.35rem); }
+
+    .hero-facts { display: none; margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1.75rem; }
+    @media (min-width: 1024px) { .hero-facts { display: block; } }
+    .hero-facts dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .hero-facts dt {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .hero-facts dd { margin-top: 0.375rem; font-size: 0.875rem; color: var(--ink); }
+
+    .hero-image {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      border: 1px solid var(--line-strong);
+      background: var(--surface-2);
+    }
+    .hero-image img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(0.4) contrast(1.05) brightness(0.85);
+      transition: filter 0.6s;
+    }
+    .hero-image:hover img { filter: grayscale(0.1) contrast(1.05) brightness(0.95); }
+    .hero-image::before, .hero-image::after {
+      content: "";
+      position: absolute;
+      width: 1.25rem; height: 1.25rem;
+      border: 1px solid var(--accent);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .hero-image::before { top: 0.75rem; left: 0.75rem; border-right: none; border-bottom: none; }
+    .hero-image::after  { bottom: 0.75rem; right: 0.75rem; border-left: none; border-top: none; }
+    .hero-image-meta {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 1.25rem 1.5rem;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: linear-gradient(to top, rgba(5,8,12,0.92), transparent);
+      z-index: 2;
+    }
+    .hero-image-meta span:last-child { color: var(--accent); }
+
+    .section-head { margin-bottom: 3.5rem; }
+    .section-head .tac-label { margin-bottom: 1.25rem; }
+    .section-head h2 {
+      font-size: 2rem;
+      max-width: 22ch;
+      color: var(--ink-bright);
+      line-height: 1.1;
+    }
+    @media (min-width: 640px) { .section-head h2 { font-size: 2.75rem; } }
+    @media (min-width: 1024px) { .section-head h2 { font-size: 3.75rem; } }
+    .section-head h2 .serif-accent { color: var(--accent-bright); }
+
+    #statement { background: var(--surface); }
+    #statement .container { max-width: 78rem; }
+    .statement-text {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: 1.5rem;
+      line-height: 1.35;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--ink-bright);
+    }
+    @media (min-width: 640px) { .statement-text { font-size: 2rem; } }
+    @media (min-width: 1024px) { .statement-text { font-size: 2.75rem; } }
+    .statement-text .serif-accent { color: var(--accent-bright); }
+    .statement-sig {
+      margin-top: 2.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .statement-sig::before { content: ""; width: 3rem; height: 1px; background: var(--accent); opacity: 0.6; }
+
+    .works-grid {
+      display: grid; grid-template-columns: 1fr; gap: 3.5rem;
+    }
+    @media (min-width: 1024px) {
+      .works-grid { grid-template-columns: repeat(12, 1fr); gap: 0 2rem; }
+      .work-item { grid-column: span 7; }
+      .work-item:nth-child(odd) { grid-column-start: 6; margin-top: 5rem; }
+      .work-item:nth-child(even) { grid-column-start: 1; }
+    }
+    .work-item figure { margin: 0; }
+
+    .work-image {
+      position: relative; overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .work-image img {
+      width: 100%; object-fit: cover;
+      filter: grayscale(0.7) contrast(1.05) brightness(0.8);
+      transition: filter 0.6s, transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .work-item:hover .work-image img {
+      filter: grayscale(0.2) contrast(1.05) brightness(0.95);
+      transform: scale(1.02);
+    }
+    .work-image::before {
+      content: attr(data-index);
+      position: absolute; top: 0.75rem; left: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.16em;
+      color: var(--ink);
+      background: rgba(5,8,12,0.75);
+      padding: 0.25rem 0.5rem;
+      border: 1px solid var(--line-strong);
+      z-index: 2;
+    }
+
+    .work-item figcaption {
+      border-top: 1px dashed var(--line);
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      display: flex; justify-content: space-between; align-items: baseline; gap: 1.25rem;
+    }
+    .work-item h3 {
+      font-family: var(--body);
+      font-size: 1.125rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--ink-bright);
+      line-height: 1.3;
+    }
+    .work-medium {
+      margin-top: 0.375rem;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .work-year {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .pinned {
+      background: var(--surface-3);
+      min-height: 100svh;
+      display: flex; align-items: center;
+      padding-block: 6rem;
+      border-top: 1px dashed var(--line);
+      border-bottom: 1px dashed var(--line);
+      position: relative;
+      overflow: hidden;
+    }
+    .pinned::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(107,150,168,0.08), transparent 60%);
+      pointer-events: none;
+    }
+    .pinned-inner {
+      display: grid; grid-template-columns: 1fr; gap: 3rem;
+      align-items: center; width: 100%;
+      position: relative;
+    }
+    @media (min-width: 1024px) {
+      .pinned-inner { grid-template-columns: repeat(12, 1fr); gap: 2rem; }
+      .pinned-copy { grid-column: span 6; max-width: 34rem; }
+      .pinned-image { grid-column: 8 / span 5; }
+    }
+    .pinned-copy h2 {
+      font-size: 2rem;
+      color: var(--ink-bright);
+    }
+    @media (min-width: 640px) { .pinned-copy h2 { font-size: 2.75rem; } }
+    @media (min-width: 1024px) { .pinned-copy h2 { font-size: 3.5rem; } }
+    .pinned-copy p {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+    .pinned-copy .btn { margin-top: 2rem; }
+
+    .pinned-image {
+      position: relative; overflow: hidden;
+      aspect-ratio: 3 / 4;
+      border: 1px solid var(--line-strong);
+      background: var(--surface-2);
+    }
+    .pinned-image img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(0.6) contrast(1.05) brightness(0.75);
+    }
+    .pinned-image::before, .pinned-image::after {
+      content: "";
+      position: absolute;
+      width: 1rem; height: 1rem;
+      border: 1px solid var(--accent);
+      z-index: 2;
+    }
+    .pinned-image::before { top: 0.6rem; left: 0.6rem; border-right: none; border-bottom: none; }
+    .pinned-image::after  { bottom: 0.6rem; right: 0.6rem; border-left: none; border-top: none; }
+
+    #principles { background: var(--surface); }
+    .principles-grid {
+      display: grid; grid-template-columns: 1fr; gap: 2.5rem 2rem;
+    }
+    @media (min-width: 768px) { .principles-grid { grid-template-columns: repeat(3, 1fr); } }
+    .principle {
+      border-top: 1px dashed var(--line);
+      padding-top: 1.75rem;
+    }
+    .principle-num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    .principle h3 {
+      font-family: var(--body);
+      font-size: 1.125rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--ink-bright);
+      line-height: 1.35;
+    }
+    .principle p {
+      margin-top: 0.75rem;
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+
+    .about-top {
+      display: grid; grid-template-columns: 1fr; gap: 2.5rem;
+    }
+    @media (min-width: 1024px) {
+      .about-top { grid-template-columns: repeat(12, 1fr); gap: 2rem; }
+      .about-heading { grid-column: span 7; }
+      .about-text { grid-column: span 5; }
+    }
+    .about-heading h2 {
+      max-width: 20ch;
+      font-size: 2rem;
+      line-height: 1.1;
+      color: var(--ink-bright);
+    }
+    @media (min-width: 640px) { .about-heading h2 { font-size: 2.75rem; } }
+    @media (min-width: 1024px) { .about-heading h2 { font-size: 3.5rem; } }
+    .about-text p {
+      font-size: 0.9375rem;
+      line-height: 1.75;
+      color: var(--ink-muted);
+    }
+    .about-text p + p { margin-top: 1.25rem; }
+
+    .about-photos {
+      display: grid; grid-template-columns: 1fr; gap: 1rem;
+      margin-top: 3.5rem;
+    }
+    @media (min-width: 640px) { .about-photos { grid-template-columns: repeat(3, 1fr); } }
+    .about-photo {
+      position: relative; overflow: hidden; aspect-ratio: 3 / 2;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .about-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(0.8) contrast(1.05) brightness(0.75);
+      transition: filter 0.6s, transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .about-photo:hover img {
+      filter: grayscale(0.2) brightness(0.95);
+      transform: scale(1.04);
+    }
+    .about-photo::after {
+      content: attr(data-label);
+      position: absolute; bottom: 0.5rem; left: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.16em;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+    }
+
+    .facts-ledger {
+      margin-top: 3.5rem;
+      border-top: 1px dashed var(--line);
+      padding-top: 2rem;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem 2rem;
+    }
+    @media (min-width: 640px) { .facts-ledger { grid-template-columns: repeat(4, 1fr); } }
+    .facts-ledger dt {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .facts-ledger dd {
+      margin-top: 0.375rem;
+      font-size: 0.9375rem;
+      color: var(--ink-bright);
+    }
+
+    #process { background: var(--surface); }
+    .process-grid {
+      display: grid; grid-template-columns: 1fr; gap: 3rem;
+    }
+    @media (min-width: 1024px) {
+      .process-grid { grid-template-columns: repeat(12, 1fr); gap: 2rem; }
+      .process-sticky { grid-column: span 5; }
+      .process-steps { grid-column: span 7; }
+      .process-sticky > div { position: sticky; top: 6rem; }
+    }
+    .process-steps ol { list-style: none; }
+    .process-steps li {
+      border-top: 1px dashed var(--line);
+      padding-block: 2.5rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .process-steps li { flex-direction: row; gap: 2.5rem; padding-block: 2.75rem; }
+    }
+    .step-index {
+      font-family: var(--mono);
+      font-size: 1rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      padding-top: 0.25rem;
+      min-width: 2.5rem;
+    }
+    .step-content h3 {
+      font-family: var(--body);
+      font-size: 1.25rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--ink-bright);
+    }
+    @media (min-width: 1024px) { .step-content h3 { font-size: 1.5rem; } }
+    .step-content p {
+      margin-top: 0.75rem;
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      max-width: 52ch;
+    }
+
+    .skills-header {
+      display: flex; flex-direction: column; gap: 2rem;
+      margin-bottom: 3.5rem;
+    }
+    @media (min-width: 1024px) {
+      .skills-header { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+    }
+    .skills-lead {
+      max-width: 42ch;
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+    .skills-grid {
+      display: grid; grid-template-columns: 1fr; gap: 2.5rem 2rem;
+    }
+    @media (min-width: 768px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .skill-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      transition: border-color 0.3s, background 0.3s, transform 0.5s cubic-bezier(0.16,1,0.3,1);
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-card:hover {
+      border-color: var(--line-strong);
+      background: var(--surface-2);
+      transform: translateY(-4px);
+    }
+    .skill-card::before {
+      content: attr(data-num);
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      z-index: 2;
+    }
+    .skill-image {
+      aspect-ratio: 3 / 2;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .skill-image img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: grayscale(0.7) contrast(1.05) brightness(0.65);
+      transition: filter 0.5s;
+    }
+    .skill-card:hover .skill-image img { filter: grayscale(0.3) brightness(0.85); }
+
+    .skill-info { padding: 1.25rem 1.5rem 1.5rem; }
+    .skill-info h3 {
+      font-family: var(--body);
+      font-size: 1.125rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--ink-bright);
+    }
+    .skill-info p {
+      margin-top: 0.5rem;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      color: var(--ink-muted);
+    }
+    .skill-level {
+      margin-top: 0.75rem !important;
+      font-family: var(--mono) !important;
+      font-size: 0.625rem !important;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent) !important;
+    }
+
+    #testimonials { background: var(--surface); }
+    .testimonials-grid {
+      display: grid; grid-template-columns: 1fr; gap: 2rem;
+    }
+    @media (min-width: 768px) { .testimonials-grid { grid-template-columns: repeat(3, 1fr); } }
+    .testimonial {
+      border: 1px solid var(--line);
+      background: var(--canvas);
+      padding: 1.75rem 1.5rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative;
+    }
+    .testimonial::before {
+      content: "REPORT";
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.2em;
+      color: var(--ink-whisper);
+    }
+    .testimonial blockquote {
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: 1.125rem;
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      color: var(--ink);
+      text-transform: none;
+    }
+    @media (min-width: 1024px) { .testimonial blockquote { font-size: 1.25rem; } }
+    .testimonial blockquote::before { content: "“"; color: var(--accent); margin-right: 0.125rem; }
+    .testimonial blockquote::after  { content: "”"; color: var(--accent); }
+    .testimonial figcaption {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--line);
+    }
+    .testimonial figcaption p:first-child {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-bright);
+    }
+    .testimonial figcaption p:last-child {
+      margin-top: 0.375rem;
+      font-size: 0.8125rem;
+      color: var(--ink-muted);
+    }
+
+    .modules-grid {
+      list-style: none;
+      display: grid; grid-template-columns: 1fr; gap: 0;
+    }
+    @media (min-width: 640px) { .modules-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .modules-grid { grid-template-columns: repeat(3, 1fr); } }
+    .modules-grid li {
+      border-top: 1px dashed var(--line);
+      padding-block: 1.25rem;
+      display: flex; align-items: baseline; gap: 1rem;
+    }
+    .modules-grid .mod-index {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      min-width: 1.75rem;
+    }
+    .modules-grid .mod-name {
+      font-size: 0.9375rem;
+      color: var(--ink);
+    }
+
+    #faq { background: var(--surface); }
+    .faq-grid {
+      display: grid; grid-template-columns: 1fr; gap: 3rem;
+    }
+    @media (min-width: 1024px) {
+      .faq-grid { grid-template-columns: repeat(12, 1fr); gap: 2rem; }
+      .faq-heading { grid-column: span 4; }
+      .faq-list { grid-column: span 8; }
+    }
+    .faq-item { border-top: 1px dashed var(--line); }
+    .faq-question {
+      width: 100%;
+      background: none; border: none; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 2rem;
+      padding-block: 1.5rem;
+      text-align: left;
+      color: var(--ink);
+      transition: color 0.2s;
+    }
+    .faq-question:hover { color: var(--ink-bright); }
+    .faq-question .q-num {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      margin-right: 1rem;
+    }
+    .faq-question .q-text {
+      font-family: var(--body);
+      font-size: 1rem;
+      font-weight: 500;
+      flex: 1;
+    }
+    @media (min-width: 1024px) { .faq-question .q-text { font-size: 1.125rem; } }
+    .faq-icon {
+      font-family: var(--mono);
+      font-size: 1.125rem;
+      color: var(--accent);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .faq-question[aria-expanded="true"] .faq-icon { transform: rotate(45deg); }
+    .faq-panel {
+      overflow: hidden;
+      max-height: 0; opacity: 0;
+      transition: max-height 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.35s;
+    }
+    .faq-panel p {
+      padding-bottom: 1.75rem;
+      max-width: 62ch;
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      color: var(--ink-muted);
+    }
+
+    #contact.pinned {
+      text-align: center;
+    }
+    #contact .pinned-inner {
+      grid-template-columns: 1fr !important;
+      max-width: 40rem;
+      margin-inline: auto;
+    }
+    #contact .tac-label { justify-content: center; }
+    #contact .pinned-copy { max-width: 100% !important; grid-column: auto !important; }
+    #contact .cta-row { justify-content: center; }
+
+    footer {
+      background: var(--surface-3);
+      border-top: 1px solid var(--line);
+      padding: 5rem 1.5rem 2.5rem;
+      position: relative; z-index: 1;
+    }
+    @media (min-width: 1024px) { footer { padding-inline: 3rem; } }
+    .footer-grid {
+      display: grid; grid-template-columns: 1fr; gap: 3rem;
+    }
+    @media (min-width: 1024px) {
+      .footer-grid { grid-template-columns: repeat(12, 1fr); gap: 2rem; }
+      .footer-brand { grid-column: span 5; }
+      .footer-col { grid-column: span 2; }
+      .footer-follow { grid-column: span 3; }
+    }
+    .footer-emblem-row {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .footer-emblem-row .emblem { width: 2.5rem; height: 2.5rem; }
+    .footer-tagline {
+      max-width: 26ch;
+      font-family: var(--display);
+      font-weight: 500;
+      font-size: 1.25rem;
+      line-height: 1.4;
+      color: var(--ink);
+      text-transform: none;
+      letter-spacing: 0.01em;
+    }
+    .footer-email {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 0.25rem;
+    }
+    .footer-email:hover { color: var(--accent-bright); }
+
+    .footer-col p:first-child,
+    .footer-follow p:first-child {
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .footer-col ul, .footer-follow ul {
+      list-style: none;
+      margin-top: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .footer-col a, .footer-follow a {
+      font-size: 0.875rem;
+      color: var(--ink-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-col a:hover, .footer-follow a:hover { color: var(--accent-bright); }
+
+    .giant-wordmark {
+      margin-top: 5rem;
+      text-align: center;
+      overflow: hidden;
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 18vw;
+      line-height: 0.8;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: rgba(214, 221, 226, 0.06);
+      user-select: none;
+    }
+    .legal-bar {
+      margin-top: 2.5rem;
+      border-top: 1px dashed var(--line);
+      padding-top: 1.75rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      justify-content: space-between;
+    }
+    @media (min-width: 640px) { .legal-bar { flex-direction: row; align-items: center; } }
+    .legal-bar p, .legal-bar a {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      text-decoration: none;
+    }
+    .legal-bar a:hover { color: var(--ink-muted); }
+    .legal-links { display: flex; gap: 1.5rem; }
+
+    .menu-overlay {
+      position: fixed; inset: 0; z-index: 80;
+      visibility: hidden; pointer-events: none;
+    }
+    .menu-overlay.open { visibility: visible; pointer-events: auto; }
+
+    .menu-panel {
+      position: absolute; inset: 0;
+      background: var(--surface-3);
+      transform-origin: top;
+      transform: scaleY(0);
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .menu-overlay.open .menu-panel { transform: scaleY(1); }
+
+    .menu-content {
+      position: relative;
+      height: 100%;
+      display: flex; flex-direction: column;
+      padding: 1.5rem 1.5rem 2rem;
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+    }
+    @media (min-width: 1024px) { .menu-content { padding: 1.5rem 3rem 2rem; } }
+    .menu-overlay.open .menu-content {
+      opacity: 1;
+      transition-delay: 0.2s;
+    }
+
+    .menu-top {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .menu-top-left {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .menu-top-left::before {
+      content: "";
+      width: 0.5rem; height: 0.5rem;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-bright);
+    }
+    .menu-close {
+      background: transparent; border: 1px solid var(--line-strong);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.5rem 0.875rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .menu-close:hover { border-color: var(--accent); color: var(--accent-bright); }
+
+    .menu-nav {
+      flex: 1;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      gap: 0.5rem;
+      padding-block: 2rem;
+    }
+    .menu-nav a {
+      display: flex; align-items: baseline; gap: 1.5rem;
+      text-decoration: none;
+      color: var(--ink-bright);
+      padding-block: 0.75rem;
+      border-bottom: 1px dashed var(--line);
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .menu-overlay.open .menu-nav a { opacity: 1; transform: translateY(0); }
+    .menu-overlay.open .menu-nav a:nth-child(1) { transition-delay: 0.3s; }
+    .menu-overlay.open .menu-nav a:nth-child(2) { transition-delay: 0.37s; }
+    .menu-overlay.open .menu-nav a:nth-child(3) { transition-delay: 0.44s; }
+    .menu-overlay.open .menu-nav a:nth-child(4) { transition-delay: 0.51s; }
+    .menu-overlay.open .menu-nav a:nth-child(5) { transition-delay: 0.58s; }
+    .menu-overlay.open .menu-nav a:nth-child(6) { transition-delay: 0.65s; }
+
+    .menu-nav a .menu-idx {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      color: var(--accent);
+      min-width: 2rem;
+    }
+    .menu-nav a .menu-label {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      transition: color 0.2s, font-style 0.2s;
+    }
+    @media (min-width: 640px) { .menu-nav a .menu-label { font-size: 2.75rem; } }
+    @media (min-width: 1024px) { .menu-nav a .menu-label { font-size: 3.75rem; } }
+    .menu-nav a:hover .menu-label {
+      color: var(--accent-bright);
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .menu-bottom {
+      border-top: 1px dashed var(--line);
+      padding-top: 1.5rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    @media (min-width: 640px) {
+      .menu-bottom { flex-direction: row; align-items: flex-end; }
+    }
+    .menu-overlay.open .menu-bottom {
+      opacity: 1;
+      transition-delay: 0.7s;
+    }
+    .menu-bottom-left a {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .menu-bottom-left a:hover { color: var(--accent-bright); }
+    .menu-bottom-left p {
+      margin-top: 0.375rem;
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .menu-social {
+      display: flex; gap: 1.25rem; list-style: none;
+    }
+    .menu-social a {
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      text-decoration: none;
+    }
+    .menu-social a:hover { color: var(--accent-bright); }
+
+    body.menu-open {
+      overflow: hidden;
+      height: 100vh;
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(1.5rem);
+      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .reveal-plate {
+      opacity: 0;
+      transform: translateY(2.5rem) scale(1.02);
+      transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal-plate.visible { opacity: 1; transform: translateY(0) scale(1); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-plate, .menu-nav a, .menu-panel, .menu-content {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      html { scroll-behavior: auto; }
+      body::after { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .work-item:hover .work-image img,
+      .about-photo:hover img,
+      .skill-card:hover .skill-image img { transform: none; }
+    }
+  </style>
 </head>
 <body id="top">
-    
+
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <img class="emblem" src="assets/Images/Icons/oni_minimalist.png" alt="ONI">
+        <div class="header-left-text">
+          <p>Student · Software Engineering</p>
+          <p>// UTM · L2 · Active</p>
+        </div>
+      </div>
+
+      <a href="#top" class="logo" aria-label="Return to top">
+        <span class="logo-mark"></span>
+        <span class="logo-text">Jonathan Tonta</span>
+      </a>
+
+      <div class="header-right">
+        <nav class="header-nav" aria-label="Primary">
+          <a href="#works">Projects</a>
+          <a href="#about">About</a>
+          <a href="#process">Process</a>
+        </nav>
+
+        <svg class="emblem" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.5" aria-label="ONI emblem placeholder" style="display:none">
+          <path d="M20 20 L100 20 L100 80 Q60 110 60 115 Q60 110 20 80 Z"/>
+          <path d="M60 35 L88 78 L32 78 Z"/>
+          <ellipse cx="60" cy="62" rx="11" ry="6"/>
+          <circle cx="60" cy="62" r="2.5" fill="currentColor"/>
+        </svg>
+
+        <button class="menu-btn" id="openMenu" aria-label="Open menu" aria-expanded="false" aria-controls="menuOverlay">
+          <span class="menu-btn-label">Menu</span>
+          <span class="hamburger"><span></span><span></span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="hero-tag reveal">
+            <span class="tag-dot"></span>
+            <span>// Personnel File · Active</span>
+          </div>
+          <h1 class="reveal" style="transition-delay:100ms;">
+            Building systems,<br>
+            <span class="serif-accent">solving</span> problems.
+          </h1>
+          <p class="hero-lead reveal" style="transition-delay:250ms;">
+            Second Year Software Engineering Student at the University of Technology, Mauritius. Trained across the stack from C and Java to React, Node, and Android, focused on writing software that is clear, tested, and operational.
+          </p>
+          <div class="cta-row reveal" style="transition-delay:400ms;">
+            <a href="#works" class="btn btn-solid">Deployed Systems <span class="btn-arrow">→</span></a>
+            <a href="#skills" class="btn btn-ghost">Arsenal <span class="btn-arrow">→</span></a>
+          </div>
+          <div class="hero-facts reveal" style="transition-delay:550ms;">
+            <dl>
+              <div><dt>Sector</dt><dd>Mauritius</dd></div>
+              <div><dt>Commissioned</dt><dd>2016</dd></div>
+              <div><dt>Focus</dt><dd>Full-stack · Mobile · Algorithms</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <div class="hero-image reveal-plate" style="transition-delay:200ms;">
+          <img src="assets/images/Profile/PFP.png" alt="Operative portrait placeholder" loading="eager">
+          <div class="hero-image-meta">
+            <span>File // Portrait</span>
+            <span>Status · Active</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="statement">
+      <div class="container">
+        <div class="tac-label reveal">// 01 · Doctrine</div>
+        <p class="statement-text reveal" style="margin-top:2rem; transition-delay:150ms;">
+          Code is a <span class="serif-accent">material</span> — shaped, tested, and refined until it does exactly what it should. My work isn't about clever syntax. It's about systems people can <span class="serif-accent">trust</span>.
+        </p>
+        <div class="statement-sig reveal" style="transition-delay:350ms;">— Signed · Sierra</div>
+      </div>
+    </section>
+
+    <section id="works" class="rule" style="scroll-margin-top:6rem;">
+      <div class="container">
+        <div class="section-head">
+          <div class="tac-label reveal">// 02 · Operational Records</div>
+          <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+            Deployed <span class="serif-accent">systems</span> &amp; field builds.
+          </h2>
+        </div>
+
+        <div class="works-grid">
+          <article class="work-item reveal-plate">
+            <figure>
+              <div class="work-image" data-index="01 // DEPLOYED">
+                <img src="https://images.unsplash.com/photo-1559181567-c3190ca9959b?q=80&w=1200&auto=format&fit=crop" alt="Algorithm visualiser" style="aspect-ratio:3/2;" loading="lazy">
+              </div>
+              <figcaption>
+                <div>
+                  <h3>Algorithm Visualiser</h3>
+                  <p class="work-medium">Java · DSA · Swing</p>
+                </div>
+                <span class="work-year">2025</span>
+              </figcaption>
+            </figure>
+          </article>
+
+          <article class="work-item reveal-plate">
+            <figure>
+              <div class="work-image" data-index="02 // DEPLOYED">
+                <img src="https://images.unsplash.com/photo-1532879311112-62b7188d28ce?q=80&w=1200&auto=format&fit=crop" alt="Course planner web app" style="aspect-ratio:3/2;" loading="lazy">
+              </div>
+              <figcaption>
+                <div>
+                  <h3>Campus Course Planner</h3>
+                  <p class="work-medium">React · Node.js · MySQL</p>
+                </div>
+                <span class="work-year">2025</span>
+              </figcaption>
+            </figure>
+          </article>
+
+          <article class="work-item reveal-plate">
+            <figure>
+              <div class="work-image" data-index="03 // DEPLOYED">
+                <img src="https://images.unsplash.com/photo-1607153333879-c174d265f1d2?q=80&w=1200&auto=format&fit=crop" alt="Android habit tracker" style="aspect-ratio:3/4;" loading="lazy">
+              </div>
+              <figcaption>
+                <div>
+                  <h3>Habit Tracker</h3>
+                  <p class="work-medium">Kotlin · Android · SQLite</p>
+                </div>
+                <span class="work-year">2025</span>
+              </figcaption>
+            </figure>
+          </article>
+
+          <article class="work-item reveal-plate">
+            <figure>
+              <div class="work-image" data-index="04 // DEPLOYED">
+                <img src="https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=1200&auto=format&fit=crop" alt="Library REST API" style="aspect-ratio:3/2;" loading="lazy">
+              </div>
+              <figcaption>
+                <div>
+                  <h3>Library REST API</h3>
+                  <p class="work-medium">PHP · Laravel · REST</p>
+                </div>
+                <span class="work-year">2024</span>
+              </figcaption>
+            </figure>
+          </article>
+
+          <article class="work-item reveal-plate">
+            <figure>
+              <div class="work-image" data-index="05 // DEPLOYED">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop" alt="Bash backup utility" style="aspect-ratio:3/2;" loading="lazy">
+              </div>
+              <figcaption>
+                <div>
+                  <h3>Bash Backup Utility</h3>
+                  <p class="work-medium">Bash · Linux · Automation</p>
+                </div>
+                <span class="work-year">2024</span>
+              </figcaption>
+            </figure>
+          </article>
+
+          <article class="work-item reveal-plate">
+            <figure>
+              <div class="work-image" data-index="06 // DEPLOYED">
+                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200&auto=format&fit=crop" alt="2D puzzle game" style="aspect-ratio:3/2;" loading="lazy">
+              </div>
+              <figcaption>
+                <div>
+                  <h3>2D Puzzle Game</h3>
+                  <p class="work-medium">C# · Unity · Game Logic</p>
+                </div>
+                <span class="work-year">2024</span>
+              </figcaption>
+            </figure>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="pinned">
+      <div class="container pinned-inner">
+        <div class="pinned-copy">
+          <div class="tac-label reveal">// 03 · Recruitment</div>
+          <h2 class="reveal" style="margin-top:1.5rem; transition-delay:100ms;">
+            Good software starts with a clear problem.
+          </h2>
+          <p class="reveal" style="transition-delay:250ms;">
+            Open to internships, freelance builds, and open-source collaboration. If you have a problem worth solving, the studio is listening.
+          </p>
+          <a href="#contact" class="btn btn-solid reveal" style="transition-delay:350ms;">Open Channel <span class="btn-arrow">→</span></a>
+        </div>
+        <div class="pinned-image reveal-plate" style="transition-delay:200ms;">
+          <img src="https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=1000&auto=format&fit=crop" alt="Operations workspace" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <section id="principles" class="rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="tac-label reveal">// 04 · Doctrine</div>
+          <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+            Three rules I <span class="serif-accent">code</span> by.
+          </h2>
+        </div>
+        <div class="principles-grid">
+          <article class="principle reveal" style="transition-delay:0ms;">
+            <div class="principle-num">// 01</div>
+            <h3>Clarity over cleverness.</h3>
+            <p>Code should be readable by the next operative. Optimize for maintainability before you optimize for tricks.</p>
+          </article>
+          <article class="principle reveal" style="transition-delay:90ms;">
+            <div class="principle-num">// 02</div>
+            <h3>Test what you ship.</h3>
+            <p>A feature isn't done until it's tested. Unit tests and integration tests are part of the build — not an afterthought.</p>
+          </article>
+          <article class="principle reveal" style="transition-delay:180ms;">
+            <div class="principle-num">// 03</div>
+            <h3>Stay curious across the stack.</h3>
+            <p>I move between C, Java, JavaScript, Python, and SQL because problems don't stay in one layer.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="rule" style="scroll-margin-top:6rem;">
+      <div class="container">
+        <div class="about-top">
+          <div class="about-heading">
+            <div class="tac-label reveal">// 05 · Personnel File</div>
+            <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+              I learn by building, breaking, and <span class="serif-accent">rebuilding</span>.
+            </h2>
+          </div>
+          <div class="about-text">
+            <p class="reveal">I started coding in college with algorithms and data structures. That foundation still shapes how I approach every project: understand the problem, choose the right structure, then write the solution.</p>
+            <p class="reveal" style="transition-delay:100ms;">Today I'm in Second Year of the BSc (Hons) Software Engineering at University of Technology, Mauritius, working through modules in web application development, mobile development, database design, systems analysis, and software security. Side projects connect the theory to real, working software.</p>
+            <p class="reveal" style="transition-delay:200ms;">When I'm not studying, I'm reading source code, breaking my own builds, or picking up a new language by writing something small with it.</p>
+          </div>
+        </div>
+
+        <div class="about-photos">
+          <div class="about-photo reveal-plate" data-label="// LOG 001" style="transition-delay:0ms;">
+            <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=800&auto=format&fit=crop" alt="Code on screen" loading="lazy">
+          </div>
+          <div class="about-photo reveal-plate" data-label="// LOG 002" style="transition-delay:100ms;">
+            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop" alt="Workspace" loading="lazy">
+          </div>
+          <div class="about-photo reveal-plate" data-label="// LOG 003" style="transition-delay:200ms;">
+            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop" alt="Developer tools" loading="lazy">
+          </div>
+        </div>
+
+        <dl class="facts-ledger reveal">
+          <div><dt>Sector</dt><dd>Mauritius</dd></div>
+          <div><dt>Commissioned</dt><dd>2016</dd></div>
+          <div><dt>Focus</dt><dd>Full-stack · Mobile · Algorithm</dd></div>
+          <div><dt>Assignment</dt><dd>UTM · Second Year</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section id="process" class="rule" style="scroll-margin-top:6rem;">
+      <div class="container process-grid">
+        <div class="process-sticky">
+          <div>
+            <div class="section-head">
+              <div class="tac-label reveal">// 06 · Protocol</div>
+              <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+                From <span class="serif-accent">problem</span> to product.
+              </h2>
+            </div>
+          </div>
+        </div>
+        <div class="process-steps">
+          <ol>
+            <li class="reveal">
+              <div class="step-index">01</div>
+              <div class="step-content">
+                <h3>Understand</h3>
+                <p>Before writing code, map the problem: who it's for, what data it needs, and what "done" looks like.</p>
+              </div>
+            </li>
+            <li class="reveal" style="transition-delay:100ms;">
+              <div class="step-index">02</div>
+              <div class="step-content">
+                <h3>Design</h3>
+                <p>Sketch the architecture, choose the stack, design the data model. This is where most bugs are prevented.</p>
+              </div>
+            </li>
+            <li class="reveal" style="transition-delay:200ms;">
+              <div class="step-index">03</div>
+              <div class="step-content">
+                <h3>Build &amp; test</h3>
+                <p>Build in small increments, write tests alongside the code, refactor when something starts to feel heavy.</p>
+              </div>
+            </li>
+            <li class="reveal" style="transition-delay:300ms;">
+              <div class="step-index">04</div>
+              <div class="step-content">
+                <h3>Ship &amp; learn</h3>
+                <p>Deployment isn't the end. Monitor, collect feedback, iterate. Software is never truly finished.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="rule" style="scroll-margin-top:6rem;">
+      <div class="container">
+        <div class="skills-header">
+          <div class="section-head" style="margin-bottom:0;">
+            <div class="tac-label reveal">// 07 · Arsenal</div>
+            <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+              Authorized <span class="serif-accent">toolkit</span>.
+            </h2>
+          </div>
+          <p class="skills-lead reveal" style="transition-delay:200ms;">
+            Hands-on experience across languages, frameworks, and platforms. Grouped below by operational use.
+          </p>
+        </div>
+
+        <div class="skills-grid">
+          <div class="skill-card reveal" data-num="01" style="transition-delay:0ms;">
+            <div class="skill-image">
+              <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop" alt="Backend code" loading="lazy">
+            </div>
+            <div class="skill-info">
+              <h3>Backend &amp; Scripting</h3>
+              <p>Java · Python · Node.js · PHP · C · C++ · C# · Ruby</p>
+              <p class="skill-level">// Status · Proficient</p>
+            </div>
+          </div>
+
+          <div class="skill-card reveal" data-num="02" style="transition-delay:90ms;">
+            <div class="skill-image">
+              <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=800&auto=format&fit=crop" alt="Frontend code" loading="lazy">
+            </div>
+            <div class="skill-info">
+              <h3>Frontend &amp; Mobile</h3>
+              <p>React · Angular · JavaScript · HTML/CSS · Kotlin · Android · Xamarin</p>
+              <p class="skill-level">// Status · Proficient</p>
+            </div>
+          </div>
+
+          <div class="skill-card reveal" data-num="03" style="transition-delay:180ms;">
+            <div class="skill-image">
+              <img src="https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=800&auto=format&fit=crop" alt="Databases and tools" loading="lazy">
+            </div>
+            <div class="skill-info">
+              <h3>Data &amp; Infrastructure</h3>
+              <p>MySQL · MongoDB · Git · Linux · Bash · PowerShell · Spring</p>
+              <p class="skill-level">// Status · Operational</p>
+            </div>
+          </div>
+
+          <div class="skill-card reveal" data-num="04" style="transition-delay:270ms;">
+            <div class="skill-image">
+              <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop" alt="Foundations" loading="lazy">
+            </div>
+            <div class="skill-info">
+              <h3>Foundations</h3>
+              <p>Algorithms · Data Structures · OOP · SQL · REST · Testing</p>
+              <p class="skill-level">// Status · Embedded</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="pinned" style="scroll-margin-top:6rem;">
+      <div class="container pinned-inner">
+        <div class="pinned-copy">
+          <div class="tac-label reveal" style="justify-content:center;">// 08 · Channel Open</div>
+          <h2 class="reveal" style="margin-top:1.5rem; transition-delay:100ms;">
+            Start with a <span class="serif-accent">conversation</span>.
+          </h2>
+          <p class="reveal" style="transition-delay:250ms;">
+            Internship, freelance build, or just a question about code — send a transmission. I reply to every real signal.
+          </p>
+          <div class="cta-row reveal" style="margin-top:2rem; justify-content:center; transition-delay:350ms;">
+            <a href="mailto:sierra@oniunsc.org" class="btn btn-solid">Send Transmission <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="tac-label reveal">// 09 · Field Reports</div>
+          <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+            What <span class="serif-accent">collaborators</span> say.
+          </h2>
+        </div>
+        <div class="testimonials-grid">
+          <figure class="testimonial reveal" style="transition-delay:0ms;">
+            <blockquote>The kind of student who doesn't just submit an assignment, he refactors it until it's something he's proud to show.</blockquote>
+            <figcaption>
+              <p>Module Lecturer</p>
+              <p>Software Engineering, UTM</p>
+            </figcaption>
+          </figure>
+          <figure class="testimonial reveal" style="transition-delay:110ms;">
+            <blockquote>We paired on a group project and he was the one who kept the architecture clean and the tests passing.</blockquote>
+            <figcaption>
+              <p>Project Teammate</p>
+              <p>Second Year · BSc Software Eng</p>
+            </figcaption>
+          </figure>
+          <figure class="testimonial reveal" style="transition-delay:220ms;">
+            <blockquote>He asks the right questions before writing a line of code. That's rarer than it should be.</blockquote>
+            <figcaption>
+              <p>UTM Friend</p>
+              <p>Second Year · BSc Software Eng</p>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules" class="rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="tac-label reveal">// 10 · Training Records</div>
+          <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+            Modules <span class="serif-accent">logged</span>.
+          </h2>
+        </div>
+        <ul class="modules-grid">
+          <li class="reveal"><span class="mod-index">01</span><span class="mod-name">Data Structures &amp; Algorithms</span></li>
+          <li class="reveal"><span class="mod-index">02</span><span class="mod-name">Web Application Development</span></li>
+          <li class="reveal"><span class="mod-index">03</span><span class="mod-name">UI/UX Design</span></li>
+          <li class="reveal"><span class="mod-index">04</span><span class="mod-name">Advanced Database Design</span></li>
+          <li class="reveal"><span class="mod-index">05</span><span class="mod-name">System Analysis &amp; Design</span></li>
+          <li class="reveal"><span class="mod-index">06</span><span class="mod-name">Mobile Application Development</span></li>
+          <li class="reveal"><span class="mod-index">07</span><span class="mod-name">Web Service Development</span></li>
+          <li class="reveal"><span class="mod-index">08</span><span class="mod-name">Agile Project Management</span></li>
+          <li class="reveal"><span class="mod-index">09</span><span class="mod-name">Software Security</span></li>
+          <li class="reveal"><span class="mod-index">10</span><span class="mod-name">Research &amp; Innovation</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="faq" class="rule">
+      <div class="container faq-grid">
+        <div class="faq-heading">
+          <div class="section-head" style="margin-bottom:0;">
+            <div class="tac-label reveal">// 11 · Debrief</div>
+            <h2 class="reveal" style="transition-delay:100ms; margin-top:1.25rem;">
+              Before you <span class="serif-accent">transmit</span>.
+            </h2>
+          </div>
+        </div>
+        <div class="faq-list">
+          <div class="faq-item reveal">
+            <h3>
+              <button class="faq-question" aria-expanded="false" aria-controls="faq1" id="faq1-btn">
+                <span><span class="q-num">Q1</span><span class="q-text">Are you available for internships?</span></span>
+                <span class="faq-icon">+</span>
+              </button>
+            </h3>
+            <div class="faq-panel" id="faq1" role="region" aria-labelledby="faq1-btn">
+              <p>Yes. I'm looking for a work placement or internship where I can contribute to real projects and learn from a team. Comfortable across backend, frontend, and mobile — and quick to pick up new tools.</p>
+            </div>
+          </div>
+          <div class="faq-item reveal" style="transition-delay:80ms;">
+            <h3>
+              <button class="faq-question" aria-expanded="false" aria-controls="faq2" id="faq2-btn">
+                <span><span class="q-num">Q2</span><span class="q-text">What kind of projects do you take on?</span></span>
+                <span class="faq-icon">+</span>
+              </button>
+            </h3>
+            <div class="faq-panel" id="faq2" role="region" aria-labelledby="faq2-btn">
+              <p>Web applications, REST APIs, small mobile apps, and automation scripts. If you have a well-defined problem and need someone who can turn it into working software, we should talk.</p>
+            </div>
+          </div>
+          <div class="faq-item reveal" style="transition-delay:160ms;">
+            <h3>
+              <button class="faq-question" aria-expanded="false" aria-controls="faq3" id="faq3-btn">
+                <span><span class="q-num">Q3</span><span class="q-text">How do you work in a team?</span></span>
+                <span class="faq-icon">+</span>
+              </button>
+            </h3>
+            <div class="faq-panel" id="faq3" role="region" aria-labelledby="faq3-btn">
+              <p>Group coursework using Git, code reviews, and agile-style planning. I communicate clearly, document my code, and I'm not afraid to ask questions when something is unclear.</p>
+            </div>
+          </div>
+          <div class="faq-item reveal" style="transition-delay:240ms;">
+            <h3>
+              <button class="faq-question" aria-expanded="false" aria-controls="faq4" id="faq4-btn">
+                <span><span class="q-num">Q4</span><span class="q-text">Can I see your code?</span></span>
+                <span class="faq-icon">+</span>
+              </button>
+            </h3>
+            <div class="faq-panel" id="faq4" role="region" aria-labelledby="faq4-btn">
+              <p>Yes. Most of my projects live on GitHub and local repositories. Repo links available on request, and I'm happy to walk through any of them.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-emblem-row">
+            <img class="emblem" src="assets/Images/Icons/unsc.png" alt="UNSC">
+            <img class="emblem" src="assets/Images/Icons/oni.png" alt="ONI">
+            <img class="emblem" src="assets/Images/Icons/unsc_da.png" alt="UNSC DA">
+          </div>
+          <p class="footer-tagline">Light, written in code. Systems, written to last.</p>
+          <a href="mailto:sierra@oniunsc.org" class="footer-email">sierra@oniunsc.org</a>
+        </div>
+
+        <div class="footer-col">
+          <p>// Explore</p>
+          <ul>
+            <li><a href="#works">Projects</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#process">Process</a></li>
+            <li><a href="#skills">Arsenal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <p>// Connect</p>
+          <ul>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#contact">Collab</a></li>
+            <li><a href="#contact">CV</a></li>
+            <li><a href="#contact">GitHub</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-follow">
+          <p>// Channels</p>
+          <ul>
+            <li><a href="https://github.com/Sierra-001" target="_blank" rel="noreferrer noopener">GitHub Personal</a></li>
+            <li><a href="https://github.com/Sierra001" target="_blank" rel="noreferrer noopener">GitHub UTM</a></li>
+            <li><a href="https://www.linkedin.com/in/jonathan-tonta-9b0b6b36a/" target="_blank" rel="noreferrer noopener">LinkedIn</a></li>
+            <li><a href="https://x.com/Sierra001A" target="_blank" rel="noreferrer noopener">X / Twitter</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="giant-wordmark" aria-hidden="true">Sierra</div>
+
+      <div class="legal-bar">
+        <p>© 2026 ONI/UNSC · All rights reserved</p>
+        <div class="legal-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="menu-overlay" id="menuOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="menu-panel"></div>
+    <div class="menu-content">
+      <div class="menu-top">
+        <div class="menu-top-left">// Menu · Secure</div>
+        <button class="menu-close" id="closeMenu" aria-label="Close menu">Close ✕</button>
+      </div>
+
+      <nav class="menu-nav" aria-label="Site">
+        <a href="#works"><span class="menu-idx">01</span><span class="menu-label">Projects</span></a>
+        <a href="#about"><span class="menu-idx">02</span><span class="menu-label">About</span></a>
+        <a href="#process"><span class="menu-idx">03</span><span class="menu-label">Process</span></a>
+        <a href="#skills"><span class="menu-idx">04</span><span class="menu-label">Arsenal</span></a>
+        <a href="#contact"><span class="menu-idx">05</span><span class="menu-label">Contact</span></a>
+      </nav>
+
+      <div class="menu-bottom">
+        <div class="menu-bottom-left">
+          <a href="mailto:sierra@oniunsc.org">sierra@oniunsc.org</a>
+          <p>// Sector · Mauritius</p>
+        </div>
+        <ul class="menu-social">
+          <li><a href="https://github.com/Sierra-001" target="_blank" rel="noreferrer noopener">GitHub Personal</a></li>
+          <li><a href="https://github.com/Sierra001" target="_blank" rel="noreferrer noopener">GitHub UTM</a></li>
+          <li><a href="https://www.linkedin.com/in/jonathan-tonta-9b0b6b36a/" target="_blank" rel="noreferrer noopener">LinkedIn</a></li>
+          <li><a href="https://x.com/Sierra001A" target="_blank" rel="noreferrer noopener">X</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    let lenis = null;
+    try {
+      const mod = await import("https://cdn.jsdelivr.net/npm/lenis@1.3.19/+esm");
+      const Lenis = mod.default;
+      lenis = new Lenis({ smoothWheel: true });
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    } catch (e) {
+    }
+
+    const revealEls = document.querySelectorAll('.reveal, .reveal-plate');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+    revealEls.forEach(el => io.observe(el));
+-
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!open));
+        const panel = document.getElementById(btn.getAttribute('aria-controls'));
+        if (!panel) return;
+        if (open) {
+          panel.style.maxHeight = '0';
+          panel.style.opacity = '0';
+        } else {
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          panel.style.opacity = '1';
+        }
+      });
+    });
+
+    const overlay = document.getElementById('menuOverlay');
+    const openBtn = document.getElementById('openMenu');
+    const closeBtn = document.getElementById('closeMenu');
+    const body = document.body;
+
+    function openMenu() {
+      overlay.classList.add('open');
+      overlay.setAttribute('aria-hidden', 'false');
+      openBtn.setAttribute('aria-expanded', 'true');
+      body.classList.add('menu-open');
+      if (lenis) lenis.stop();
+    }
+    function closeMenu() {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+      openBtn.setAttribute('aria-expanded', 'false');
+      body.classList.remove('menu-open');
+      if (lenis) lenis.start();
+    }
+
+    openBtn.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeMenu();
+    });
+
+    overlay.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        closeMenu();
+        if (!target) return;
+        setTimeout(() => {
+          if (lenis) {
+            lenis.scrollTo(target, { offset: -20 });
+          } else {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 350);
+      });
+    });
+  </script>
 </body>
 </html>
