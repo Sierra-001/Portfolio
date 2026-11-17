@@ -438,10 +438,9 @@
       display: grid; grid-template-columns: 1fr; gap: 3.5rem;
     }
     @media (min-width: 1024px) {
-      .works-grid { grid-template-columns: repeat(12, 1fr); gap: 0 2rem; }
-      .work-item { grid-column: span 7; }
-      .work-item:nth-child(odd) { grid-column-start: 6; margin-top: 5rem; }
-      .work-item:nth-child(even) { grid-column-start: 1; }
+    .works-grid { grid-template-columns: repeat(12, 1fr); gap: 0 2rem; }
+    .work-item { grid-column: 1 / span 7; }
+    .work-item:nth-child(odd) { grid-column: 6 / span 7; margin-top: 5rem; }
     }
     .work-item figure { margin: 0; }
 
